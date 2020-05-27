@@ -1,0 +1,18 @@
+'''
+    # test if sorted right by mark
+    if(key == "mark"):  # TODO lambda -.-
+        for j in range (len(result) - 1):
+            assert result[j].get_mark() <= result[j + 1].get_mark(), "E: result is not sorted by mark"
+            # check for stable
+            if result[j].get_mark() <= result[j + 1].get_mark():
+                assert original.index(result[j]) < original.index(
+                    result[j + 1]), "E: sorted result is not stable"  # compare original elem position
+
+    # test if sorted right by name
+    if (key == "name"):  # TODO lambda -.-
+        for j in range(len(result) - 1):
+            assert result[j].get_name() <= result[j + 1].get_name(), "E: result is not sorted by name"
+            # check for stability
+            if result[j].get_name() == result[j + 1].get_name():
+                assert original.index(result[j]) < original.index(
+                    result[j + 1]), "E: sorted result is not stable"  # compare original elem position'''
