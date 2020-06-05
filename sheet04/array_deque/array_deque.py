@@ -6,6 +6,7 @@
 import doctest
 import pytest
 import copy
+import timeit
 
 ###########################################################
 
@@ -257,3 +258,10 @@ def check_pop_first(deque, original):
         if deque[i] != original[i]:
             is_same = False
     assert is_same
+
+###################################################
+
+
+if __name__ == "__main__":
+    print("Durschnittliche Laufzeit von push:")
+    print(timeit.timeit('a.push(2)', setup='from __main__ import array_deque;a=array_deque()', number=10000) / 10000)
