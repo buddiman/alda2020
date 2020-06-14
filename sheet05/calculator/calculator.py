@@ -1,113 +1,154 @@
+'''
+AlDa Blatt 05
+Christopher Höllriegl, Marvin Schmitt
+
+Aufgabe 2
+'''
+
+class Node:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.left = None
+        self.right = None
+
+
 class Number:
-    def __init__(self, num):
-        self.value = num
+    def __init__(self, value):
+        self.value = value
+
 
 class Operator:
-    def __init__(self, l, o, r):
-        self.left = l
-        self.right = r
-        self.operator = o
+    def __init__(self, operator):
+        self.operator = operator
+        self.left = None
+        self.right = None
 
 
-# Tupel to define the priority of the operators
-priority = {'*': 3,
-            '/': 3,     # punkt vor strich
-            '+': 2,
-            '-': 2,
-            '(': 9,
-            ')': 0}     # last
+# Operator Priority
+priority = {
+    '(': 0,     # Note: not higher than the others
+    ')': 0,
+    '+': 1,
+    '-': 1,
+    '*': 2,
+    '/': 2
+}
 
 
-# Shunting-Yard Algorithm
-def shunting_yard(infix):
-    # If param is null raise exception
-    if infix is None:
-        raise SyntaxError
-
-    # make a list from
-    expression = list(infix)
-
-    output, operatorStack = [], []
+def shuntingYard(expression):
+    '''
+    converts an infix expression to reverse polish notation using the shunting yard algorithm
+    https://de.wikipedia.org/wiki/Shunting-yard-Algorithmus
+    :param expression: infix expression
+    :return: expression as reverse polish notation
+    '''
+    stack = []
+    output = []
 
     for token in expression:
-        # check if element is a digit
+        # Append digits without further processing
         if token.isdigit():
             output.append(token)
-        # if not digit check if present in
-        elif token in priority:
-            while operatorStack:
-                stackTop = operatorStack[-1]
-                if priority[token] <= priority[stackTop]:
-                    if token != ')':
-                        if stackTop != '(':
-                            operatorStack.pop()
-                            output.append(stackTop)
-                        else:
-                            break
-                    else:
-                        if stackTop != '(':
-                            operatorStack.pop()
-                            output.append(stackTop)
-                        else:
-                            operatorStack.pop()
-                            break
+
+        # process operators
+        else:
+            # if last element then append directly
+            if len(stack) == 0:
+                stack.append(token)
+            else:
+                # handle brackets
+                if token == "(":
+                    stack.append(token)
+                elif token == ")":
+                    while stack[len(stack) - 1] != "(":
+                        output.append(stack.pop())
+                    stack.pop()
+
+                # check if token has higher priority
+                elif priority[token] > priority[stack[len(stack) - 1]]:
+                    stack.append(token)
                 else:
-                    break
+                    while len(stack) != 0:
+                        # everything up to opening bracket
+                        if stack[len(stack) - 1] == '(':
+                            break
+                        output.append(stack.pop())
+                    stack.append(token)
 
-            if token != ')':
-                operatorStack.append(token)
+    # move temporary stack to a return value
+    # just to be sure, every element for it self. Forgot this :-/
+    while len(stack) != 0:
+       output.append(stack.pop())
 
-    while operatorStack:
-        remainingItem = operatorStack[-1]
-        operatorStack.pop()
-        output.append(remainingItem)
     return output
 
-def parse (input):
-    shuntingYard = shunting_yard(input)
 
-    if shuntingYard is None:
-        raise SyntaxError
 
+def parse(s):
+    '''
+    create a tree from an expression.
+    :param s: expression
+    :return: root node of the tree
+    '''
+    # Create reverse polish notation from the expression
+    rpn = shuntingYard(s)
+
+    # tracking stack
     stack = []
 
-    for token in shuntingYard:
-        if token in priority:
-            stack.append(Operator(stack.pop(), token, stack.pop()))
+    # Now parse every element
+    for token in rpn:
+        # check if element is a digit, then create a node
+        if token.isdigit():
+            node = Number(token)
+            stack.append(node)
+
+        # process operators
         else:
-            stack.append(Number(token))
+            # create a node and get the children from the stack
+            node = Operator(token)
+            node.right = stack.pop()
+            node.left = stack.pop()
 
-    if len(stack) != 1:
-        raise SyntaxError
+            # put the node on the stack
+            stack.append(node)
 
-    return stack[0]
+    # return the root (last on the stack) node
+    return stack.pop()
 
-## todo FIX THIS
+
 def evaluateTree(root):
-    if root is None:
-        raise SyntaxError("tree is empty")
+    '''
+    evaluate the tree and calculate the solution
+    :param root: Root node of the tree
+    :return: Solution
+    '''
 
-    # check if root is a instance of Number
+    # if the Node is just a number, return
     if isinstance(root, Number):
-        return root.value
+        return int(root.value)  # compiler says to cast here...
 
-    leftEvaluation = int(evaluateTree(root.left))       # round to int if float
-    rightEvaluation = int(evaluateTree(root.right))
+    # now handle the operators. Recursion yeahhh
+    else:
+        if root.operator == '*':
+            return evaluateTree(root.left) * evaluateTree(root.right)
+        elif root.operator == '/':
+            return evaluateTree(root.left) / evaluateTree(root.right)
+        elif root.operator == '+':
+            return evaluateTree(root.left) + evaluateTree(root.right)
+        elif root.operator == '-':
+            return evaluateTree(root.left) - evaluateTree(root.right)
+        else:
+            raise RuntimeError("Operator not found.")
 
-    # evaluate operators
-    if root.operator == '+':
-        return rightEvaluation + leftEvaluation
-    elif root.operator == '-':
-        return rightEvaluation - leftEvaluation
-    elif root.operator == '*':
-        return rightEvaluation * leftEvaluation
-    elif root.operator == '/':
-        return rightEvaluation / leftEvaluation
-
-if __name__ == '__main__':
-    infix = '2*4*(3+(4-7)*8)-(1-6)'
-    print("Converted String polish form: {}", shunting_yard(infix)) # expect 2 4 * 3 4 7 − 8 * + * 1 6 − −  YAYY works right
-    converted= shunting_yard(infix)
-
-    # 2*4*(3+(4-7)*8)-(1-6) = -163
-    print(evaluateTree(parse(converted)))   # WRONG Output...
+if __name__ == "__main__":
+    print("Expression: 2*4*(3+(4-7)*8)-(1-6):")
+    print("Reverse polish notation: ", shuntingYard("2*4*(3+(4-7)*8)-(1-6)"))
+    tree = parse("2*4*(3+(4-7)*8)-(1-6)")
+    print("Evaluation: ", evaluateTree(tree))
+    print("\n")
+    print("Expression: 2+5*3:")
+    print("Reverse polish notation: ", shuntingYard("2+5*3"))
+    tree = parse("2+5*3")
+    print("Evaluation: ", evaluateTree(tree))
