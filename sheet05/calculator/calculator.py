@@ -125,12 +125,16 @@ def evaluateTree(root):
     :return: Solution
     '''
 
+    # check for empty nodes
+    if root is None:
+        return None
+
     # if the Node is just a number, return
     if isinstance(root, Number):
         return int(root.value)  # compiler says to cast here...
 
     # now handle the operators. Recursion yeahhh
-    else:
+    elif isinstance(root, Operator):
         if root.operator == '*':
             return evaluateTree(root.left) * evaluateTree(root.right)
         elif root.operator == '/':
@@ -141,6 +145,10 @@ def evaluateTree(root):
             return evaluateTree(root.left) - evaluateTree(root.right)
         else:
             raise RuntimeError("Operator not found.")
+
+    # throw an error if there is a problem with the tree (unsupported elements)
+    else:
+        raise RuntimeError("Unsupported character used!")
 
 if __name__ == "__main__":
     print("Expression: 2*4*(3+(4-7)*8)-(1-6):")
