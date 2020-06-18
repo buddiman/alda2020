@@ -241,20 +241,21 @@ class TreapBase(SearchTree):
     def __setitem__(self, key, value):
         self._root, key_is_new = TreapBase._tree_insert(self._root, key, value, self._is_dynamic_treap)
         if key_is_new:
-            self._size += 1   
+            self._size += 1
             
             
     def __getitem__(self, key):
         node = TreapBase._tree_find(self._root, key)
         if node is None:
             raise KeyError(key)
+            
+        # very inefficient, but this secures heap property :)
         if self._is_dynamic_treap:
-            node._priority += 1
-            TreapBase._upheap(node)
+            TreapBase._tree_insert(self._root, key, node._value, self._is_dynamic_treap)
         return node._value
     
     def __str__(self):
-        return "Empty Treap!" if self._root is None else self._root.display()
+        return "Empty Treap!" if self._root is None else "\n"+self._root.display()+"\n"
     
     @staticmethod        
     def _tree_insert(node, key, value, is_dynamic_treap):
@@ -262,23 +263,34 @@ class TreapBase(SearchTree):
         if node is None:
             node = TreapBase.Node(key, value, is_dynamic_treap)
             key_is_new = True
+            
         elif key == node._key:
             node._value = value
             key_is_new = False
+            if is_dynamic_treap:
+                node._priority += 1
+                
         elif key < node._key:
             node._left, key_is_new = TreapBase._tree_insert(node._left, key, value, is_dynamic_treap)
+            node = TreapBase._upheap(node)
+
+                
         else:
             node._right, key_is_new = TreapBase._tree_insert(node._right, key, value, is_dynamic_treap)
+            node = TreapBase._upheap(node)
             
         # Repariere Heap auf Rückweg der Rekursion
-        if node._right is not None:
-            TreapBase._upheap(node)
                 
         return node, key_is_new
         
     @staticmethod
     def _upheap(node):
-        pass
+        if node._left is not None and node._left._priority > node._priority:
+            node = SearchTree._tree_rotate_right(node)
+        if node._right is not None and node._right._priority > node._priority:
+                node = SearchTree._tree_rotate_left(node)
+        return node
+        
                 
         
 
@@ -412,35 +424,6 @@ def try_rotate():
     print("rotating")
     t._root._right = SearchTree._tree_rotate_left(t._root._right)
     print(t)
-
-# Aufgabe e)
-def compareTrees(tree1, tree2):
-    '''
-    compares trees
-    :param tree1: tree to compare
-    :param tree2: tree to compare
-    :return: true if equal, false if not
-    '''
-    # compare the size of the trees
-    if not tree1._size == tree2._size:
-        return False
-
-    # check the nodes recursive
-    return compareNodes(tree1._root, tree2._root)
-
-def compareNodes(node1, node2):
-    # return false if value is not same
-    if node1._value != node2._value:
-        return False
-
-    # return true if there are no children left.
-    if (node1._right == None and node1._left == None) and (node2._right == None and node2._left == None):
-        return True
-
-    # if the values are the same AND there are child nodes go into recursion
-    # should work because it is only false when value is not the same and true if we are at the bottom of the tree
-    # TODO use 'or' or 'and' ? or should be right
-    return (compareNodes(node1._left, node2._left) or compareNodes(node1._right, node2._right))
     
     
 
@@ -449,13 +432,16 @@ if __name__ == '__main__':
     test_depth()
     #try_rotate()
     
-    t = RandomTreap()
+    t = DynamicTreap()
     t[2] = 2
     t[6] = 6
     t[10] = 10
     t[4] = 4
     t[5] = 5
-    print(type(t._root))
+    print(t)
+    t[5] = 6
+    print(t)
+    t[5] = 7
     print(t)
     
     
