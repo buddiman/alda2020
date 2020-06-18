@@ -412,6 +412,35 @@ def try_rotate():
     print("rotating")
     t._root._right = SearchTree._tree_rotate_left(t._root._right)
     print(t)
+
+# Aufgabe e)
+def compareTrees(tree1, tree2):
+    '''
+    compares trees
+    :param tree1: tree to compare
+    :param tree2: tree to compare
+    :return: true if equal, false if not
+    '''
+    # compare the size of the trees
+    if not tree1._size == tree2._size:
+        return False
+
+    # check the nodes recursive
+    return compareNodes(tree1._root, tree2._root)
+
+def compareNodes(node1, node2):
+    # return false if value is not same
+    if node1._value != node2._value:
+        return False
+
+    # return true if there are no children left.
+    if (node1._right == None and node1._left == None) and (node2._right == None and node2._left == None):
+        return True
+
+    # if the values are the same AND there are child nodes go into recursion
+    # should work because it is only false when value is not the same and true if we are at the bottom of the tree
+    # TODO use 'or' or 'and' ? or should be right
+    return (compareNodes(node1._left, node2._left) or compareNodes(node1._right, node2._right))
     
     
 
