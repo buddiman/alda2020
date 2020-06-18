@@ -631,7 +631,7 @@ if __name__ == '__main__':
 
     print("depth of random treap: ", max(randomDepth))
     print("depth of dynamic treap: ", max(dynamicDepth))
-    print("depth of perfectly balanced tree for {} words {}", uniqueWordCount, int(math.ceil(math.log(uniqueWordCount) / math.log(2.0))))
+    print("depth of perfectly balanced tree for {} words {}".format(uniqueWordCount, int(math.ceil(math.log(uniqueWordCount) / math.log(2.0)))))
 
     # didn't know any better word than priority for "Zugriffs Häufigkeit"
     # it is sufficient to get this value from dt-treap only because it is the same.
