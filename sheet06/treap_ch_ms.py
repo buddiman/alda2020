@@ -1,11 +1,23 @@
+'''
+Christopher Höllriegl, Marvin Schmitt
+Blatt06
+'''
+
+'''
+Aufgabe f)
+Die Aussage wird bestätigt.
+'''
+
 import pytest
 import random
+import math
 
 class SearchTree:
     class Node:
-        def __init__(self, key, value):
+        def __init__(self, key, value, priority):
             self._key = key
             self._value = value
+            self._priority = priority   # TODO priority muss in node!!
             self._left = self._right = None
             
         def display(self):
@@ -425,7 +437,80 @@ def try_rotate():
     t._root._right = SearchTree._tree_rotate_left(t._root._right)
     print(t)
     
-    
+
+
+# Aufgabe e)
+# Need to do it this way because there are no values. treeSort is from the script.
+def treeSort(node,array):
+    if node is None:
+        return
+    treeSort(node._left, array)
+    array.append(node._key)
+    treeSort(node._right, array)
+
+def compareTrees(tree1, tree2):
+    array1, array2 = list(), list()
+    treeSort(tree1._root, array1)
+    treeSort(tree2._root, array2)
+
+    # fml, don't have to deal with loops or anything thanks to python supporting this
+    if array1 == array2:
+        return True
+    return False
+
+# old, just for reference LOL
+'''def compareTrees(tree1, tree2):'''
+'''
+    compares trees
+    :param tree1: tree to compare
+    :param tree2: tree to compare
+    :return: true if equal, false if not
+    '''
+'''
+    # compare the size of the trees
+    if not tree1._size == tree2._size:
+        return False
+
+    # check the nodes recursive
+    return compareNodes(tree1._root, tree2._root)
+
+def compareNodes(node1, node2):
+    # return false if value is not same
+    if node1._value != node2._value:
+        return False
+
+    # return true if there are no children left.
+    if (node1._right == None and node1._left == None) and (node2._right == None and node2._left == None):
+        return True
+
+    # if the values are the same AND there are child nodes go into recursion
+    # should work because it is only false when value is not the same and true if we are at the bottom of the tree
+    return (compareNodes(node1._left, node2._left) or compareNodes(node1._right, node2._right))
+    '''
+
+# Aufgabe d)
+def readFile(filename):
+    s = open(filename, encoding='latin_1').read()
+    for k in ',;.:-"\'!?':
+        s = s.replace(k, '')    # Sonderzeichen entfernen
+    s = s.lower()               # alles klein schreiben
+    return s.split()            # string in array von Woertern umwandeln
+
+# Aufgabe f)
+def depth(node, array, depthParam):
+    if node is None:
+        return
+    depth(node._left, array, (depthParam + 1))
+    array.append(depthParam)
+    depth(node._right, array, (depthParam + 1))
+
+
+def priority(node, array):
+    if node is None:
+        return
+    priority(node._left, array)
+    array.append(node._priority)
+    priority(node._right, array)
 
 if __name__ == '__main__':
     test_search_tree()
@@ -443,5 +528,59 @@ if __name__ == '__main__':
     print(t)
     t[5] = 7
     print(t)
+
+    # continue d)
+
+    # read the file
+    print("reading: 'die-drei-musketiere.txt':")
+    readedText = readFile('die-drei-musketiere.txt')
+
+    # create the treaps
+    rt = RandomTreap()
+    dt = DynamicTreap()
+
+    # fill the treaps
+    for word in readedText:
+        rt[word] = None
+        dt[word] = None
+
+    if compareTrees(rt, dt):
+        print("Both Treaps are equal")
+    else:
+        print("Treaps are not equal")
+
+    # Aufgabe f)
+
+    # count the words, not specified if total or unique
+    totalWordCount = len(readedText)
+    uniqueWordCount = dt._size
+
+    print("total number of words:", totalWordCount)
+    print("unique number of words:", uniqueWordCount)
+
+    # Calculate the depth of both treaps
+    randomDepth, dynamicDepth = [], []
+    depth(rt._root, randomDepth, 0)
+    depth(dt._root, dynamicDepth, 0)
+
+
+    print("depth of random treap: ", max(randomDepth))
+    print("depth of dynamic treap: ", max(dynamicDepth))
+    print("depth of perfectly balanced tree for {} words {}", uniqueWordCount, int(math.ceil(math.log(uniqueWordCount) / math.log(2.0))))
+
+    # didn't know any better word than priority for "Zugriffs Häufigkeit"
+    # it is sufficient to get this value from dt-treap only because it is the same.
+    priorities = []
+    priority(dt._root, priorities)
+
+    randomAccessSum = 0.0
+    dynamicAccessSum = 0.0
+
+    for i in range(uniqueWordCount):
+        randomAccessSum += priorities[i] * randomDepth[i]
+        dynamicAccessSum += priorities[i] * dynamicDepth[i]
+
+    print("access time random treap", (randomAccessSum / totalWordCount))
+    print("access time dynamic treap", (dynamicAccessSum / totalWordCount))
     
     
