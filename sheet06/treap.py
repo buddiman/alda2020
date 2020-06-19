@@ -382,11 +382,28 @@ class DynamicTreap(TreapBase):
     def __init__(self):
         super().__init__()
         self._is_dynamic_treap = True
+        
+    def top(self, min_priority):
+        tops = []
+        def aux_top(node, tops):
+            if node._priority >= min_priority:
+                
+                tops.append((node._key, node._priority))
+                
+                # search in left subtree if existent
+                if node._left is not None:
+                    aux_top(node._left, tops)
+                # search in right subtree if existent
+                if node._right is not None:
+                    aux_top(node._right, tops)
+        aux_top(self._root, tops)
+        
+        return tops
     
 
 # Tests
-def test_search_tree():
-    t = SearchTree()
+def test_search_tree_properties():
+    t = RandomTreap()
     assert len(t) == 0
     
     t[1] = 1
@@ -502,6 +519,48 @@ def try_rotate():
     t._root._right = SearchTree._tree_rotate_left(t._root._right)
     print(t)
     
+def test_dynamictreap_priority():
+    t = DynamicTreap()
+    t[2] = 2
+    t[6] = 6
+    t[10] = 10
+    t[4] = 4
+    t[5] = 5
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+    assert TreapBase._tree_find(t._root, 5)._priority == 1
+    
+    t[5] = 6
+    assert TreapBase._tree_find(t._root, 5)._priority == 2
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+
+    t[5] = 7
+    assert TreapBase._tree_find(t._root, 5)._priority == 3
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+
+    print(t[5])
+    assert TreapBase._tree_find(t._root, 5)._priority == 4
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+    
+def test_del_treap():
+    t = DynamicTreap()
+    t[2] = 2
+    t[6] = 6
+    t[10] = 10
+    t[4] = 4
+    t[5] = 5
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+    assert len(t) == 5
+    del t[5]
+    assert len(t) == 4
+    assert t.test_heap_property()
+    assert t.test_bst_property()
+    
+
 
 
 # Aufgabe e)
@@ -578,21 +637,7 @@ def priority(node, array):
     priority(node._right, array)
 
 if __name__ == '__main__':
-    test_search_tree()
-    test_depth()
-    #try_rotate()
-    
-    t = DynamicTreap()
-    t[2] = 2
-    t[6] = 6
-    t[10] = 10
-    t[4] = 4
-    t[5] = 5
-    print(t)
-    t[5] = 6
-    print(t)
-    t[5] = 7
-    print(t)
+
 
     # continue d)
 
@@ -647,5 +692,31 @@ if __name__ == '__main__':
 
     print("access time random treap", (randomAccessSum / totalWordCount))
     print("access time dynamic treap", (dynamicAccessSum / totalWordCount))
+    
+    
+    
+    # Aufgabe (g)
+    dt_min_prio = 250
+    dt_top = dt.top(dt_min_prio)
+    print(f"Printing the top {len(dt_top)} nodes (priority > {dt_min_prio})")
+    for word, prio in dt_top:
+        print(f"{word} ({prio})")
+    
+    cleaned_treap = DynamicTreap()
+    stop = set(readFile('stopwords.txt'))
+    for word in readedText:
+        if word in stop:
+            next
+        else:
+            cleaned_treap[word] = None
+               
+    print("\n\n")        
+    cleaned_min_prio = 80
+    cleaned_top = cleaned_treap.top(cleaned_min_prio)
+    print(f"Printing the top {len(cleaned_top)} nodes (priority > {cleaned_min_prio})")
+    for word, prio in cleaned_top:
+        print(f"{word} ({prio})")
+        
+    # Man erkennt an "D'Artagnan", "Athos" etc., dass der Text aus Die Drei Musketiere stammt :-)
     
     
