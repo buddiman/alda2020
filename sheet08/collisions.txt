@@ -1,0 +1,28 @@
+0G33
+0FHa
+0FJ3
+102J
+0G1a
+0Dx3
+0FIJ
+0Ea3
+1033
+0FGx
+0Dux
+101a
+0DwJ
+0G2J
+0Dva
+100x
+
+
+Vorgehensweise:
+
+1.	Eine Liste aller möglichen Strings aus Buchstaben (groß/klein) und Zahlen erstellen lassen.
+2. 	Ein Dictionary anlegen.
+3.	Für jeden String aus (1) den Hash erzeugen lassen
+		1. Existiert der Hash schon als key im dictionary, an dieser Stelle den String hinzufügen
+		2. Existiert der Hash noch nicht als key im dictionary, einen neuen key anlegen und dort den String hinzufügen
+4.	Lasse die Strings von key ausgeben, an der Stelle an der die Anzahl der Strings = 16 ist.
+
+Diese Vorgehensweise ist bei größeren Strings NICHT zu empfehlen, das hier dauerte schon über 30 Sekunden.
